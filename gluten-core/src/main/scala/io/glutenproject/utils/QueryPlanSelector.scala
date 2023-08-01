@@ -56,7 +56,7 @@ abstract class QueryPlanSelector[T <: QueryPlan[_]] extends Logging {
     val glutenEnabled = session.conf
       .get(GlutenConfig.GLUTEN_ENABLE_KEY, GlutenConfig.GLUTEN_ENABLE_BY_DEFAULT.toString)
       .toBoolean
-    logInfo(s"shouldUseGluten: $glutenEnabled")
+    logDebug(s"shouldUseGluten: $glutenEnabled")
 
     glutenEnabled & validate(plan)
   }
