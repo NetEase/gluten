@@ -19,7 +19,6 @@ package io.glutenproject.backendsapi.velox
 import io.glutenproject.GlutenConfig
 import io.glutenproject.backendsapi.ContextApi
 import io.glutenproject.exception.GlutenException
-
 import io.glutenproject.expression.UDFMappings
 import io.glutenproject.init.JniTaskContext
 import io.glutenproject.utils._
