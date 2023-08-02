@@ -82,12 +82,6 @@ public class NativePlanEvaluator {
                   return instance.spill(size);
                 })
             .getNativeInstanceId();
-
-    final String spillDirPath =
-        SparkDirectoryUtil.namespace("gluten-spill")
-            .mkChildDirRoundRobin(UUID.randomUUID().toString())
-            .getAbsolutePath();
-
     long handle =
         jniWrapper.nativeCreateKernelWithIterator(
             allocId,
@@ -97,7 +91,9 @@ public class NativePlanEvaluator {
             TaskContext.getPartitionId(),
             TaskContext.get().taskAttemptId(),
             DebugUtil.saveInputToFile(),
-            BackendsApiManager.getSparkPlanExecApiInstance().rewriteSpillPath(spillDirPath),
+            SparkDirectoryUtil.namespace("gluten-spill")
+                .mkChildDirRoundRobin(UUID.randomUUID().toString())
+                .getAbsolutePath(),
             buildNativeConfNode(
                     GlutenConfig.getNativeSessionConf(
                         BackendsApiManager.getSettings().getBackendConfigPrefix(),

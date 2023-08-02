@@ -324,8 +324,7 @@ std::unordered_map<std::string, std::string> WholeStageResultIterator::getQueryC
     configs[velox::core::QueryConfig::kOrderBySpillMemoryThreshold] =
         getConfigValue(kOrderBySpillMemoryThreshold, "0"); // spill only when input doesn't fit
     configs[velox::core::QueryConfig::kMaxSpillLevel] = getConfigValue(kMaxSpillLevel, "4");
-    configs[velox::core::QueryConfig::kMaxSpillFileSize] =
-        getConfigValue(kMaxSpillFileSize, std::to_string(20L * 1024 * 1024));
+    configs[velox::core::QueryConfig::kMaxSpillFileSize] = getConfigValue(kMaxSpillFileSize, "0");
     configs[velox::core::QueryConfig::kMinSpillRunSize] = getConfigValue(kMinSpillRunSize, std::to_string(256 << 20));
     configs[velox::core::QueryConfig::kSpillStartPartitionBit] = getConfigValue(kSpillStartPartitionBit, "29");
     configs[velox::core::QueryConfig::kSpillPartitionBits] = getConfigValue(kSpillPartitionBits, "2");
@@ -423,9 +422,6 @@ WholeStageResultIteratorFirstStage::WholeStageResultIteratorFirstStage(
   if (!task_->supportsSingleThreadedExecution()) {
     throw std::runtime_error("Task doesn't support single thread execution: " + planNode->toString());
   }
-  auto fileSystem = velox::filesystems::getFileSystem(spillDir, nullptr);
-  GLUTEN_CHECK(fileSystem != nullptr, "File System for spilling is null!");
-  fileSystem->mkdir(spillDir);
   task_->setSpillDirectory(spillDir);
   addSplits_ = [&](velox::exec::Task* task) {
     if (noMoreSplits_) {
@@ -479,9 +475,6 @@ WholeStageResultIteratorMiddleStage::WholeStageResultIteratorMiddleStage(
   if (!task_->supportsSingleThreadedExecution()) {
     throw std::runtime_error("Task doesn't support single thread execution: " + planNode->toString());
   }
-  auto fileSystem = velox::filesystems::getFileSystem(spillDir, nullptr);
-  GLUTEN_CHECK(fileSystem != nullptr, "File System for spilling is null!");
-  fileSystem->mkdir(spillDir);
   task_->setSpillDirectory(spillDir);
   addSplits_ = [&](velox::exec::Task* task) {
     if (noMoreSplits_) {

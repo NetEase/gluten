@@ -51,8 +51,6 @@ import org.apache.spark.sql.vectorized.ColumnarBatch
 
 import org.apache.commons.lang3.ClassUtils
 
-import javax.ws.rs.core.UriBuilder
-
 import scala.collection.mutable.ArrayBuffer
 
 class SparkPlanExecHandler extends SparkPlanExecApi {
@@ -399,21 +397,5 @@ class SparkPlanExecHandler extends SparkPlanExecApi {
   override def genInjectedFunctions()
       : Seq[(FunctionIdentifier, ExpressionInfo, FunctionBuilder)] = {
     UDFResolver.loadAndGetFunctionDescriptions
-  }
-
-  override def rewriteSpillPath(path: String): String = {
-    val fs = GlutenConfig.getConf.veloxSpillFileSystem
-    fs match {
-      case "local" =>
-        path
-      case "heap-over-local" =>
-        val rewritten = UriBuilder
-          .fromPath(path)
-          .scheme("jol")
-          .toString
-        rewritten
-      case other =>
-        throw new IllegalStateException(s"Unsupported fs: $other")
-    }
   }
 }

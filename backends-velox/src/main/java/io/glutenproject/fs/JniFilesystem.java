@@ -16,18 +16,14 @@
  */
 package io.glutenproject.fs;
 
+import org.apache.commons.lang3.NotImplementedException;
+
 // Mirror of C++ side gluten::JniFileSystem, only for handling calls from C++ via JNI
 public interface JniFilesystem {
 
-  static JniFilesystem getFileSystem() {
-    return OnHeapFileSystem.INSTANCE;
+  static JniFilesystem getFileSystem(String path) {
+    throw new NotImplementedException("TODO"); // implementations on the way
   }
-
-  static boolean isCapableForNewFile(long size) {
-    return getFileSystem().isCapableForNewFile0(size);
-  }
-
-  boolean isCapableForNewFile0(long size);
 
   ReadFile openFileForRead(String path); // todo read Map<String, String> as write options
 
@@ -55,12 +51,10 @@ public interface JniFilesystem {
     long memoryUsage();
 
     long getNaturalReadSize();
-
-    void close();
   }
 
   interface WriteFile {
-    void append(long length, long buf);
+    void append(byte[] data);
 
     void flush();
 
