@@ -176,11 +176,11 @@ object CHParquetReadBenchmark extends SqlBasedBenchmark {
       _ =>
         val resultRDD: RDD[Long] = nativeFileScanRDD.mapPartitionsInternal {
           batches =>
+            val jniWrapper = new CHBlockConverterJniWrapper()
             batches.map {
               batch =>
                 val block = CHNativeBlock.fromColumnarBatch(batch)
-                val info =
-                  CHBlockConverterJniWrapper.convertColumnarToRow(block.blockAddress(), null)
+                val info = jniWrapper.convertColumnarToRow(block.blockAddress())
                 new Iterator[InternalRow] {
                   var rowId = 0
                   val row = new UnsafeRow(batch.numCols())
@@ -189,7 +189,7 @@ object CHParquetReadBenchmark extends SqlBasedBenchmark {
                   override def hasNext: Boolean = {
                     val result = rowId < batch.numRows()
                     if (!result && !closed) {
-                      CHBlockConverterJniWrapper.freeMemory(info.memoryAddress, info.totalSize)
+                      jniWrapper.freeMemory(info.memoryAddress, info.totalSize)
                       closed = true
                     }
                     result

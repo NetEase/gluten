@@ -20,7 +20,8 @@ import io.glutenproject.GlutenConfig
 import io.glutenproject.backendsapi.SparkPlanExecApi
 import io.glutenproject.columnarbatch.ColumnarBatches
 import io.glutenproject.execution._
-import io.glutenproject.expression._
+import io.glutenproject.execution.{BroadcastHashJoinExecTransformer, ColumnarToRowExecBase, FilterExecTransformer, FilterExecTransformerBase, GlutenBroadcastHashJoinExecTransformer, HashAggregateExecBaseTransformer, HashAggregateExecTransformer, RowToColumnarExecBase, ShuffledHashJoinExecTransformer, ShuffledHashJoinExecTransformerBase}
+import io.glutenproject.expression.{AliasTransformer, AliasTransformerBase, ExpressionNames, ExpressionTransformer, GetStructFieldTransformer, HashExpressionTransformer, NamedStructTransformer, Sig}
 import io.glutenproject.memory.alloc.NativeMemoryAllocators
 import io.glutenproject.vectorized.{ColumnarBatchSerializer, ColumnarBatchSerializerJniWrapper}
 
@@ -40,7 +41,8 @@ import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.catalyst.plans.physical.{BroadcastMode, Partitioning}
 import org.apache.spark.sql.catalyst.rules.Rule
 import org.apache.spark.sql.execution.{ColumnarBuildSideRelation, SparkPlan, VeloxColumnarToRowExec}
-import org.apache.spark.sql.execution.datasources.GlutenWriterColumnarRules.NativeWritePostRule
+import org.apache.spark.sql.execution.datasources.ColumnarToFakeRowStrategy
+import org.apache.spark.sql.execution.datasources.GlutenColumnarRules.NativeWritePostRule
 import org.apache.spark.sql.execution.exchange.BroadcastExchangeExec
 import org.apache.spark.sql.execution.joins.BuildSideRelation
 import org.apache.spark.sql.execution.metric.SQLMetric
@@ -384,7 +386,7 @@ class SparkPlanExecHandler extends SparkPlanExecApi {
    * @return
    */
   override def genExtendedStrategies(): List[SparkSession => Strategy] = {
-    List()
+    List(ColumnarToFakeRowStrategy)
   }
 
   /** Define backend specfic expression mappings. */
