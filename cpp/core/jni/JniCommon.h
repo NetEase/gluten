@@ -264,7 +264,6 @@ class CelebornClient : public RssClient {
         env->CallIntMethod(javaCelebornShuffleWriter_, javaCelebornPushPartitionData_, partitionId, array);
     checkException(env);
     return static_cast<int32_t>(commpressedBytesSize);
-    ;
   }
 
   JavaVM* vm_;
