@@ -69,7 +69,8 @@ case class WindowExecTransformer(
   }
 
   // We no longer require for sorted input for columnar window
-  override def requiredChildOrdering: Seq[Seq[SortOrder]] = Seq.fill(children.size)(Nil)
+  override def requiredChildOrdering: Seq[Seq[SortOrder]] =
+    Seq(partitionSpec.map(SortOrder(_, Ascending)) ++ orderSpec)
 
   override def outputOrdering: Seq[SortOrder] = child.outputOrdering
 
