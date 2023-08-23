@@ -87,6 +87,7 @@ object FileFormatWriter extends Logging {
       maxWriters: Int,
       createSorter: () => UnsafeExternalRowSorter)
 
+  // scalastyle:off argcount
   /**
    * Basic work flow of this command is:
    *   1. Driver side setup, including output committer initialization and data source specific
@@ -110,7 +111,8 @@ object FileFormatWriter extends Logging {
       partitionColumns: Seq[Attribute],
       bucketSpec: Option[BucketSpec],
       statsTrackers: Seq[WriteJobStatsTracker],
-      options: Map[String, String]): Set[String] = {
+      options: Map[String, String],
+      numStaticPartitionCols: Int = 0): Set[String] = {
 
     val nativeEnabled =
       "true".equals(sparkSession.sparkContext.getLocalProperty("isNativeAppliable"))
@@ -204,9 +206,10 @@ object FileFormatWriter extends Logging {
       statsTrackers = statsTrackers
     )
 
-    // We should first sort by partition columns, then bucket id, and finally sorting columns.
-    val requiredOrdering =
-      partitionColumns ++ writerBucketSpec.map(_.bucketIdExpression) ++ sortColumns
+    // We should first sort by dynamic partition columns, then bucket id, and finally sorting
+    // columns.
+    val requiredOrdering = partitionColumns.drop(numStaticPartitionCols) ++
+      writerBucketSpec.map(_.bucketIdExpression) ++ sortColumns
     // the sort order doesn't matter
     val actualOrdering = empty2NullPlan.outputOrdering.map(_.child)
     val orderingMatched = if (requiredOrdering.length > actualOrdering.length) {
@@ -334,6 +337,7 @@ object FileFormatWriter extends Logging {
         throw QueryExecutionErrors.jobAbortedError(cause)
     }
   }
+  // scalastyle:on argcount
 
   /** Writes data out in a single Spark task. */
   private def executeTask(
