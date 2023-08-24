@@ -200,4 +200,11 @@ class GlutenDataFrameAggregateSuite extends DataFrameAggregateSuite with GlutenS
           _.isInstanceOf[HashAggregateExecBaseTransformer]).isDefined)
     }
   }
+
+  test(GlutenTestConstants.GLUTEN_TEST + "mixed supported and unsupported aggregate functions") {
+    val df = spark.sql("SELECT a, collect_set(b), max(b) FROM testData2 group by a")
+    checkAnswer(
+      df,
+      Row(1, Array(1, 2), 2) :: Row(2, Array(1, 2), 2) :: Row(3, Array(1, 2), 2) :: Nil)
+  }
 }
